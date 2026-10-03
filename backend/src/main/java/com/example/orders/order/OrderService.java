@@ -29,8 +29,10 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public List<OrderResponse> list() {
-        return repository.findAll(Sort.by(Sort.Direction.DESC, "createdAt", "id")).stream()
+    public List<OrderResponse> list(OrderStatus status) {
+        Sort newestFirst = Sort.by(Sort.Direction.DESC, "createdAt", "id");
+        List<Order> orders = status == null ? repository.findAll(newestFirst) : repository.findByStatus(status, newestFirst);
+        return orders.stream()
                 .map(OrderResponse::from)
                 .toList();
     }

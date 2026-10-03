@@ -1,5 +1,17 @@
 <section class="card">
-  <h2>Orders</h2>
+  <div class="head">
+    <h2>Orders</h2>
+    <label class="filter">
+      <span>Status</span>
+      <select (change)="onFilter($event)">
+        @for (option of filterOptions; track option.label) {
+          <option [value]="option.value ?? ''" [selected]="option.value === statusFilter()">
+            {{ option.label }}
+          </option>
+        }
+      </select>
+    </label>
+  </div>
 
   @if (error(); as message) {
     <div class="error" role="alert">
@@ -11,7 +23,9 @@
   @if (loading()) {
     <p class="state" role="status">Loading orders…</p>
   } @else if (orders().length === 0 && !error()) {
-    <p class="state">No orders yet. Create the first one.</p>
+    <p class="state">
+      {{ statusFilter() ? 'No orders with this status.' : 'No orders yet. Create the first one.' }}
+    </p>
   } @else if (orders().length > 0) {
     <div class="table-wrap">
       <table>

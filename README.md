@@ -19,7 +19,7 @@ docker-compose.yml   PostgreSQL + backend
 | Method | Path | Description |
 | --- | --- | --- |
 | POST | `/api/orders` | Create an order (`customerName`, `customerEmail`, `totalAmount`); starts as `NEW` |
-| GET | `/api/orders` | List orders, newest first |
+| GET | `/api/orders` | List orders, newest first. Optional `?status=NEW`, `PROCESSING`, `SHIPPED` or `CANCELLED` returns only that status (still newest first); an unknown value returns 400 |
 | GET | `/api/orders/{id}` | Get one order |
 | PATCH | `/api/orders/{id}/status` | Change status, e.g. `{"status": "PROCESSING"}` |
 
@@ -89,6 +89,6 @@ docker build -t order-management-frontend ./frontend   # nginx; proxies /api/ to
 
 ## Baseline scope and non-goals
 
-In scope: create, list, get and change status of orders, with validation, structured errors, tests and CI.
+In scope: create, list (optionally filtered by status), get and change status of orders, with validation, structured errors, tests and CI.
 
 Out of scope: authentication, payments, inventory, users, search, pagination, messaging, microservices, Kubernetes. Maintenance exercises (bugs, refactors, new features) are intentionally not part of this baseline.
