@@ -18,7 +18,7 @@ export class OrderForm {
   protected readonly submitError = signal<string | null>(null);
 
   protected readonly form = inject(FormBuilder).group({
-    customerName: ['', [Validators.required, Validators.maxLength(255)]],
+    customerName: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(255)]],
     customerEmail: ['', [Validators.required, Validators.email, Validators.maxLength(255)]],
     totalAmount: [null as number | null, [Validators.required, Validators.min(0)]],
   });

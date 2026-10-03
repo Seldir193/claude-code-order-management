@@ -139,6 +139,16 @@ describe('App', () => {
       expect(el.querySelectorAll('.field-error').length).toBe(3);
     });
 
+    it('rejects a whitespace-only customer name without posting and shows the validation message', async () => {
+      fill('   ', 'ada@example.com', '42.5');
+      el.querySelector('form')!.dispatchEvent(new Event('submit'));
+      await settle();
+
+      http.expectNone('/api/orders');
+      const errors = Array.from(el.querySelectorAll('.field-error')).map((e) => e.textContent);
+      expect(errors).toEqual(['Customer name is required.']);
+    });
+
     it('posts a valid order, prepends it to the list and clears the form', async () => {
       fill('Ada Lovelace', 'ada@example.com', '42.5');
       el.querySelector('form')!.dispatchEvent(new Event('submit'));
