@@ -1,4 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
+import { finalize } from 'rxjs';
 import { OrderApiService, describeApiError } from './orders/order-api.service';
 import { OrderForm } from './orders/order-form';
 import { OrderList, StatusChange } from './orders/order-list';
@@ -25,16 +26,17 @@ export class App {
   protected load(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.api.list().subscribe({
-      next: (orders) => {
-        this.orders.set(orders);
-        this.loading.set(false);
-      },
-      error: (err) => {
-        this.error.set(describeApiError(err));
-        this.loading.set(false);
-      },
-    });
+    this.api
+      .list()
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (orders) => {
+          this.orders.set(orders);
+        },
+        error: (err) => {
+          this.error.set(describeApiError(err));
+        },
+      });
   }
 
   protected onCreated(order: Order): void {
@@ -44,15 +46,16 @@ export class App {
   protected onStatusChange({ order, status }: StatusChange): void {
     this.busyOrderId.set(order.id);
     this.error.set(null);
-    this.api.changeStatus(order.id, status).subscribe({
-      next: (updated) => {
-        this.orders.update((orders) => orders.map((o) => (o.id === updated.id ? updated : o)));
-        this.busyOrderId.set(null);
-      },
-      error: (err) => {
-        this.error.set(describeApiError(err));
-        this.busyOrderId.set(null);
-      },
-    });
+    this.api
+      .changeStatus(order.id, status)
+      .pipe(finalize(() => this.busyOrderId.set(null)))
+      .subscribe({
+        next: (updated) => {
+          this.orders.update((orders) => orders.map((o) => (o.id === updated.id ? updated : o)));
+        },
+        error: (err) => {
+          this.error.set(describeApiError(err));
+        },
+      });
   }
 }
