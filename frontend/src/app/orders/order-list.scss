@@ -5,9 +5,35 @@
   border-radius: 8px;
 }
 
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+}
+
 h2 {
-  margin: 0 0 0.9rem;
+  margin: 0;
   font-size: 1.05rem;
+}
+
+.filter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #5f6673;
+
+  select {
+    padding: 0.3rem 0.5rem;
+    border: 1px solid #c4c9d2;
+    border-radius: 6px;
+    background: #fff;
+    font: inherit;
+    color: #1b2333;
+  }
 }
 
 .state,

@@ -9,6 +9,8 @@
     [loading]="loading()"
     [error]="error()"
     [busyOrderId]="busyOrderId()"
+    [statusFilter]="statusFilter()"
+    (filterChange)="onFilterChange($event)"
     (statusChange)="onStatusChange($event)"
     (retry)="load()"
   />

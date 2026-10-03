@@ -112,6 +112,85 @@ describe('App', () => {
     expect(el.querySelector('.badge')?.textContent).toContain('NEW');
   });
 
+  describe('status filter', () => {
+    const select = () => el.querySelector<HTMLSelectElement>('select')!;
+    function choose(value: string) {
+      select().value = value;
+      select().dispatchEvent(new Event('change'));
+    }
+
+    async function loadInitial(orders: Order[] = []) {
+      await settle();
+      http.expectOne('/api/orders').flush(orders);
+      await settle();
+    }
+
+    it('offers All, New, Processing, Shipped and Cancelled', async () => {
+      await loadInitial();
+
+      expect(Array.from(select().options).map((o) => o.textContent!.trim())).toEqual([
+        'All',
+        'New',
+        'Processing',
+        'Shipped',
+        'Cancelled',
+      ]);
+    });
+
+    it('requests /api/orders?status=NEW when New is selected and renders the response', async () => {
+      await loadInitial([order(1, 'NEW'), order(2, 'SHIPPED')]);
+
+      choose('NEW');
+      http.expectOne('/api/orders?status=NEW').flush([order(3, 'NEW')]);
+      await settle();
+
+      expect(el.querySelectorAll('tbody tr').length).toBe(1);
+      expect(el.querySelector('tbody')!.textContent).toContain('Customer 3');
+    });
+
+    it('drops the status parameter again when All is selected', async () => {
+      await loadInitial();
+      choose('SHIPPED');
+      http.expectOne('/api/orders?status=SHIPPED').flush([]);
+      await settle();
+      expect(el.textContent).toContain('No orders with this status');
+
+      choose('');
+      http.expectOne('/api/orders').flush([order(1, 'NEW')]);
+      await settle();
+
+      expect(el.querySelectorAll('tbody tr').length).toBe(1);
+    });
+
+    it('keeps the selection and retries with the filter when a filtered load fails', async () => {
+      await loadInitial();
+      choose('PROCESSING');
+      http.expectOne('/api/orders?status=PROCESSING').flush(null, { status: 0, statusText: 'Unknown Error' });
+      await settle();
+      expect(el.querySelector('[role=alert]')).not.toBeNull();
+      expect(select().value).toBe('PROCESSING');
+
+      el.querySelector<HTMLButtonElement>('button.retry')!.click();
+      http.expectOne('/api/orders?status=PROCESSING').flush([order(2, 'PROCESSING')]);
+      await settle();
+
+      expect(el.querySelectorAll('tbody tr').length).toBe(1);
+    });
+
+    it('removes a row that no longer matches the filter after a status change', async () => {
+      await loadInitial();
+      choose('NEW');
+      http.expectOne('/api/orders?status=NEW').flush([order(1, 'NEW')]);
+      await settle();
+
+      el.querySelector<HTMLButtonElement>('button[data-action=PROCESSING]')!.click();
+      http.expectOne('/api/orders/1/status').flush(order(1, 'PROCESSING'));
+      await settle();
+
+      expect(el.querySelectorAll('tbody tr').length).toBe(0);
+    });
+  });
+
   describe('create form', () => {
     function fill(name: string, email: string, amount: string) {
       const set = (id: string, value: string) => {

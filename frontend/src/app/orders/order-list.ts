@@ -14,6 +14,14 @@ const ACTION_LABELS: Record<OrderStatus, string> = {
   CANCELLED: 'Cancel',
 };
 
+const FILTER_OPTIONS: { value: OrderStatus | null; label: string }[] = [
+  { value: null, label: 'All' },
+  { value: 'NEW', label: 'New' },
+  { value: 'PROCESSING', label: 'Processing' },
+  { value: 'SHIPPED', label: 'Shipped' },
+  { value: 'CANCELLED', label: 'Cancelled' },
+];
+
 @Component({
   selector: 'app-order-list',
   imports: [CurrencyPipe, DatePipe],
@@ -27,8 +35,19 @@ export class OrderList {
   /** Id of the order whose status change is in flight, if any. */
   readonly busyOrderId = input<number | null>(null);
 
+  /** Active status filter; null means all orders. */
+  readonly statusFilter = input<OrderStatus | null>(null);
+
+  readonly filterChange = output<OrderStatus | null>();
   readonly statusChange = output<StatusChange>();
   readonly retry = output<void>();
+
+  protected readonly filterOptions = FILTER_OPTIONS;
+
+  protected onFilter(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    this.filterChange.emit(value === '' ? null : (value as OrderStatus));
+  }
 
   protected actionsFor(order: Order): OrderStatus[] {
     return NEXT_STATUSES[order.status];

@@ -1,9 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
-import { finalize } from 'rxjs';
+import { Subscription, finalize } from 'rxjs';
 import { OrderApiService, describeApiError } from './orders/order-api.service';
 import { OrderForm } from './orders/order-form';
 import { OrderList, StatusChange } from './orders/order-list';
-import { Order } from './orders/order.model';
+import { Order, OrderStatus } from './orders/order.model';
 
 @Component({
   selector: 'app-root',
@@ -18,6 +18,8 @@ export class App {
   protected readonly loading = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly busyOrderId = signal<number | null>(null);
+  protected readonly statusFilter = signal<OrderStatus | null>(null);
+  private loadRequest?: Subscription;
 
   constructor() {
     this.load();
@@ -26,8 +28,9 @@ export class App {
   protected load(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.api
-      .list()
+    this.loadRequest?.unsubscribe();
+    this.loadRequest = this.api
+      .list(this.statusFilter() ?? undefined)
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (orders) => {
@@ -39,8 +42,15 @@ export class App {
       });
   }
 
+  protected onFilterChange(status: OrderStatus | null): void {
+    this.statusFilter.set(status);
+    this.load();
+  }
+
   protected onCreated(order: Order): void {
-    this.orders.update((orders) => [order, ...orders]);
+    if (this.matchesFilter(order)) {
+      this.orders.update((orders) => [order, ...orders]);
+    }
   }
 
   protected onStatusChange({ order, status }: StatusChange): void {
@@ -51,11 +61,18 @@ export class App {
       .pipe(finalize(() => this.busyOrderId.set(null)))
       .subscribe({
         next: (updated) => {
-          this.orders.update((orders) => orders.map((o) => (o.id === updated.id ? updated : o)));
+          this.orders.update((orders) =>
+            orders.flatMap((o) => (o.id !== updated.id ? [o] : this.matchesFilter(updated) ? [updated] : [])),
+          );
         },
         error: (err) => {
           this.error.set(describeApiError(err));
         },
       });
+  }
+
+  private matchesFilter(order: Order): boolean {
+    const filter = this.statusFilter();
+    return filter === null || order.status === filter;
   }
 }

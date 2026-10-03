@@ -59,6 +59,38 @@ class OrderApiIntegrationTest {
     }
 
     @Test
+    void listFiltersByStatusNewestFirst() throws Exception {
+        long oldestNew = createOrder("A", "a@example.com", "1.00");
+        long processing = createOrder("B", "b@example.com", "2.00");
+        long newestNew = createOrder("C", "c@example.com", "3.00");
+        changeStatus(processing, "PROCESSING").andExpect(status().isOk());
+
+        mvc.perform(get("/api/orders").param("status", "NEW"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].id", is((int) newestNew)))
+                .andExpect(jsonPath("$[1].id", is((int) oldestNew)));
+
+        mvc.perform(get("/api/orders").param("status", "PROCESSING"))
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id", is((int) processing)));
+
+        mvc.perform(get("/api/orders").param("status", "SHIPPED"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
+
+        mvc.perform(get("/api/orders"))
+                .andExpect(jsonPath("$", hasSize(3)))
+                .andExpect(jsonPath("$[0].id", is((int) newestNew)))
+                .andExpect(jsonPath("$[2].id", is((int) oldestNew)));
+    }
+
+    @Test
+    void listWithUnknownStatusReturns400() throws Exception {
+        mvc.perform(get("/api/orders").param("status", "BOGUS")).andExpect(status().isBadRequest());
+    }
+
+    @Test
     void createReturns201WithLocationHeader() throws Exception {
         mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
                         .content(createBody("Ada", "ada@example.com", "5.00")))
