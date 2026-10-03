@@ -1,5 +1,6 @@
 import { Component, inject, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { finalize } from 'rxjs';
 import { OrderApiService, describeApiError } from './order-api.service';
 import { Order } from './order.model';
 
@@ -37,14 +38,13 @@ export class OrderForm {
         customerEmail: (customerEmail ?? '').trim(),
         totalAmount: totalAmount!,
       })
+      .pipe(finalize(() => this.submitting.set(false)))
       .subscribe({
         next: (order) => {
-          this.submitting.set(false);
           this.form.reset();
           this.created.emit(order);
         },
         error: (err) => {
-          this.submitting.set(false);
           this.submitError.set(describeApiError(err));
         },
       });
