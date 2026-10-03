@@ -2,6 +2,18 @@
 
 Baseline codebase for **Claude Code 101**: a deliberately small, working Order application that later serves as the target for codebase-maintenance exercises (bug fixing, refactoring, feature work, tests, docs) done with Claude Code.
 
+## Portfolio purpose
+
+This repository shows maintenance work on an existing codebase with Claude Code: a bug fix, a refactor and a small cross-stack feature, each as one focused PR with tests. See [docs/learning-map.md](docs/learning-map.md) for what each exercise demonstrates and what was deliberately left out.
+
+## Maintenance exercises
+
+| PR | Type | Summary |
+| --- | --- | --- |
+| [#2](https://github.com/Seldir193/claude-code-order-management/pull/2) | Bug fix | Order form rejects whitespace-only customer names (regression test added) |
+| [#4](https://github.com/Seldir193/claude-code-order-management/pull/4) | Refactor | Duplicated request-state resets replaced with RxJS `finalize()`, behavior unchanged |
+| [#6](https://github.com/Seldir193/claude-code-order-management/pull/6) | Feature | Optional `?status=` filter in the API and a status filter in the UI, with tests |
+
 ## Architecture
 
 ```
@@ -87,8 +99,8 @@ docker build -t order-management-backend ./backend
 docker build -t order-management-frontend ./frontend   # nginx; proxies /api/ to host "backend:8080"
 ```
 
-## Baseline scope and non-goals
+## Scope and non-goals
 
 In scope: create, list (optionally filtered by status), get and change status of orders, with validation, structured errors, tests and CI.
 
-Out of scope: authentication, payments, inventory, users, search, pagination, messaging, microservices, Kubernetes. Maintenance exercises (bugs, refactors, new features) are intentionally not part of this baseline.
+Out of scope: authentication, payments, inventory, users, search, pagination, messaging, microservices, Kubernetes.
