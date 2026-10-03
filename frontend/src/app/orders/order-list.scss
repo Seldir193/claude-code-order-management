@@ -1,0 +1,124 @@
+.card {
+  padding: 1.25rem;
+  background: #fff;
+  border: 1px solid #e2e5ea;
+  border-radius: 8px;
+}
+
+h2 {
+  margin: 0 0 0.9rem;
+  font-size: 1.05rem;
+}
+
+.state,
+.muted {
+  color: #5f6673;
+}
+
+.error {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 0.9rem;
+  background: #fdecea;
+  color: #8e1f1f;
+  border-radius: 6px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+th,
+td {
+  padding: 0.55rem 0.6rem;
+  text-align: left;
+  border-bottom: 1px solid #eceef2;
+  vertical-align: middle;
+}
+
+.num {
+  text-align: right;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: #e8ecf5;
+  color: #2b3a67;
+
+  &[data-status='PROCESSING'] {
+    background: #fff4d6;
+    color: #7a5a00;
+  }
+  &[data-status='SHIPPED'] {
+    background: #dff3e4;
+    color: #1d6b34;
+  }
+  &[data-status='CANCELLED'] {
+    background: #fdecea;
+    color: #8e1f1f;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+button {
+  padding: 0.3rem 0.7rem;
+  border: 1px solid #c4c9d2;
+  border-radius: 6px;
+  background: #fff;
+  font: inherit;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: progress;
+  }
+
+  &[data-action='CANCELLED'] {
+    color: #8e1f1f;
+    border-color: #e2b4b4;
+  }
+}
+
+@media (max-width: 700px) {
+  thead {
+    position: absolute;
+    left: -9999px;
+  }
+
+  tr {
+    display: block;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eceef2;
+  }
+
+  td {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    border: 0;
+    padding: 0.25rem 0;
+
+    &::before {
+      content: attr(data-label);
+      font-weight: 600;
+      color: #5f6673;
+    }
+  }
+}

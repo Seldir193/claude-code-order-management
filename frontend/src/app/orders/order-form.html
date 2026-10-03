@@ -1,0 +1,35 @@
+<form class="card" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <h2>New order</h2>
+
+  <div class="field">
+    <label for="customerName">Customer name</label>
+    <input id="customerName" type="text" formControlName="customerName" autocomplete="name" />
+    @if (showError('customerName')) {
+      <span class="field-error" role="alert">Customer name is required.</span>
+    }
+  </div>
+
+  <div class="field">
+    <label for="customerEmail">Email</label>
+    <input id="customerEmail" type="email" formControlName="customerEmail" autocomplete="email" />
+    @if (showError('customerEmail')) {
+      <span class="field-error" role="alert">Enter a valid email address.</span>
+    }
+  </div>
+
+  <div class="field">
+    <label for="totalAmount">Total amount</label>
+    <input id="totalAmount" type="number" step="0.01" min="0" formControlName="totalAmount" />
+    @if (showError('totalAmount')) {
+      <span class="field-error" role="alert">Enter an amount of 0 or more.</span>
+    }
+  </div>
+
+  @if (submitError(); as message) {
+    <p class="submit-error" role="alert">{{ message }}</p>
+  }
+
+  <button type="submit" [disabled]="submitting()">
+    {{ submitting() ? 'Creating…' : 'Create order' }}
+  </button>
+</form>

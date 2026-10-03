@@ -1,0 +1,15 @@
+<header class="app-header">
+  <h1>Order Management</h1>
+</header>
+
+<main class="layout">
+  <app-order-form (created)="onCreated($event)" />
+  <app-order-list
+    [orders]="orders()"
+    [loading]="loading()"
+    [error]="error()"
+    [busyOrderId]="busyOrderId()"
+    (statusChange)="onStatusChange($event)"
+    (retry)="load()"
+  />
+</main>

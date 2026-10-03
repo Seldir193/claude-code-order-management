@@ -1,0 +1,60 @@
+<section class="card">
+  <h2>Orders</h2>
+
+  @if (error(); as message) {
+    <div class="error" role="alert">
+      <span>{{ message }}</span>
+      <button type="button" class="retry" (click)="retry.emit()">Retry</button>
+    </div>
+  }
+
+  @if (loading()) {
+    <p class="state" role="status">Loading orders…</p>
+  } @else if (orders().length === 0 && !error()) {
+    <p class="state">No orders yet. Create the first one.</p>
+  } @else if (orders().length > 0) {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Customer</th>
+            <th>Email</th>
+            <th class="num">Total</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (order of orders(); track order.id) {
+            <tr>
+              <td data-label="ID">{{ order.id }}</td>
+              <td data-label="Customer">{{ order.customerName }}</td>
+              <td data-label="Email">{{ order.customerEmail }}</td>
+              <td data-label="Total" class="num">{{ order.totalAmount | currency: 'EUR' }}</td>
+              <td data-label="Status">
+                <span class="badge" [attr.data-status]="order.status">{{ order.status }}</span>
+              </td>
+              <td data-label="Created">{{ order.createdAt | date: 'medium' }}</td>
+              <td data-label="Actions" class="actions">
+                @for (next of actionsFor(order); track next) {
+                  <button
+                    type="button"
+                    [attr.data-action]="next"
+                    [disabled]="busyOrderId() === order.id"
+                    (click)="statusChange.emit({ order, status: next })"
+                  >
+                    {{ label(next) }}
+                  </button>
+                } @empty {
+                  <span class="muted">—</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
